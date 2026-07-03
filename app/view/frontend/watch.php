@@ -46,7 +46,10 @@ $routeParam = static fn (string $routeId): string => $routeId !== '' ? '&payment
                                 ?>
                                 <label class="payment-route-option <?= $checked ? 'is-active' : '' ?>">
                                     <input type="radio" name="payment_route_id" value="<?= htmlspecialchars($routeId) ?>" <?= $checked ? 'checked' : '' ?>>
-                                    <strong><?= htmlspecialchars((string) ($route['payment_method_name'] ?? '支付宝')) ?></strong>
+                                    <div class="payment-route-head">
+                                        <?= jx_payment_icon($route) ?>
+                                        <strong><?= htmlspecialchars((string) ($route['payment_method_name'] ?? '支付宝')) ?></strong>
+                                    </div>
                                     <span><?= htmlspecialchars((string) ($route['channel_name'] ?? $route['provider_name'] ?? '默认通道')) ?></span>
                                 </label>
                             <?php endforeach; ?>

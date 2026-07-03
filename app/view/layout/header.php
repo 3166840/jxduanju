@@ -46,6 +46,43 @@ if (!function_exists('jx_icon')) {
         return '<span class="ui-icon" aria-hidden="true"><svg viewBox="0 0 24 24" role="img">' . $paths . '</svg></span>';
     }
 }
+if (!function_exists('jx_payment_method_key')) {
+    function jx_payment_method_key(array $route): string
+    {
+        $text = strtolower((string) (($route['payment_method'] ?? '') . ' ' . ($route['payment_method_name'] ?? '') . ' ' . ($route['trade_type'] ?? '') . ' ' . ($route['pay_type'] ?? '')));
+        if (str_contains($text, 'alipay') || str_contains($text, '支付宝')) {
+            return 'alipay';
+        }
+        if (str_contains($text, 'wechat') || str_contains($text, 'weixin') || str_contains($text, 'wxpay') || str_contains($text, '微信')) {
+            return 'wechat';
+        }
+        if (str_contains($text, 'union') || str_contains($text, '云闪付') || str_contains($text, '银联')) {
+            return 'unionpay';
+        }
+
+        return 'default';
+    }
+}
+if (!function_exists('jx_payment_icon')) {
+    function jx_payment_icon(array $route): string
+    {
+        $key = jx_payment_method_key($route);
+        $label = match ($key) {
+            'alipay' => '支',
+            'wechat' => '微',
+            'unionpay' => '银',
+            default => '付',
+        };
+        $title = match ($key) {
+            'alipay' => '支付宝',
+            'wechat' => '微信支付',
+            'unionpay' => '云闪付',
+            default => '支付方式',
+        };
+
+        return '<span class="payment-method-icon is-' . htmlspecialchars($key) . '" aria-label="' . htmlspecialchars($title) . '">' . htmlspecialchars($label) . '</span>';
+    }
+}
 ?>
 <!doctype html>
 <html lang="zh-CN">
@@ -5369,7 +5406,7 @@ if (!function_exists('jx_icon')) {
             display: grid;
             gap: 5px;
             min-width: 0;
-            padding: 12px 13px 12px 38px;
+            padding: 12px 38px 12px 13px;
             border: 1px solid #edf0f5;
             border-radius: 18px;
             background: rgba(255,255,255,.82);
@@ -5379,9 +5416,39 @@ if (!function_exists('jx_icon')) {
         }
         .payment-route-option input {
             position: absolute;
-            left: 13px;
+            right: 13px;
             top: 16px;
             accent-color: #ef5d63;
+        }
+        .payment-route-head,
+        .payment-route-method {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+        }
+        .payment-method-icon {
+            display: inline-grid;
+            flex: 0 0 auto;
+            place-items: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            color: #fff;
+            background: #8b95a7;
+            font-size: 16px;
+            font-weight: 950;
+            line-height: 1;
+            box-shadow: 0 8px 16px rgba(20, 24, 32, .10);
+        }
+        .payment-method-icon.is-alipay {
+            background: #1677ff;
+        }
+        .payment-method-icon.is-wechat {
+            background: #16b66a;
+        }
+        .payment-method-icon.is-unionpay {
+            background: linear-gradient(135deg, #e73843, #2b66d9);
         }
         .payment-route-option strong,
         .payment-route-option span {
@@ -9068,12 +9135,28 @@ if (!function_exists('jx_icon')) {
         }
         .buy-tabs button,
         .buy-route-list label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
             min-height: 40px;
+            min-width: 0;
             border-radius: 999px;
             color: #6e574f;
             background: #fff;
             box-shadow: none;
             font-size: 13px;
+        }
+        .buy-route-list .payment-route-method {
+            justify-content: center;
+            gap: 6px;
+        }
+        .buy-route-list .payment-method-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 7px;
+            font-size: 13px;
+            box-shadow: none;
         }
         .buy-tabs button.is-active,
         .buy-route-list label.is-active {

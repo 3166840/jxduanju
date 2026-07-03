@@ -43,7 +43,7 @@ $defaultRouteId = $defaultRouteId ?: (string) ($paymentRoutes[0]['id'] ?? '');
                 <?php $routeId = (string) ($route['id'] ?? ''); ?>
                 <label class="<?= $routeId === $defaultRouteId || ($defaultRouteId === '' && $index === 0) ? 'is-active' : '' ?>">
                     <input type="radio" name="payment_route_id" value="<?= htmlspecialchars($routeId) ?>" <?= $routeId === $defaultRouteId || ($defaultRouteId === '' && $index === 0) ? 'checked' : '' ?>>
-                    <span><?= htmlspecialchars((string) ($route['payment_method_name'] ?? '支付宝')) ?></span>
+                    <span class="payment-route-method"><?= jx_payment_icon($route) ?><?= htmlspecialchars((string) ($route['payment_method_name'] ?? '支付宝')) ?></span>
                 </label>
             <?php endforeach; ?>
         </section>
