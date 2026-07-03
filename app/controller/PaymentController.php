@@ -71,7 +71,7 @@ class PaymentController
             exit;
         }
 
-        $orderNo = (string) ($_GET['order_no'] ?? '');
+        $orderNo = $this->requestOrderNo();
         $order = $service->findOrder($orderNo);
         if (!$order || empty($order['is_test'])) {
             return [
@@ -114,8 +114,12 @@ class PaymentController
     public function orderResult(): array
     {
         $service = new PlatformService();
-        $orderNo = (string) ($_GET['order_no'] ?? '');
+        $orderNo = $this->requestOrderNo();
         $order = $service->findOrder($orderNo);
+        if (!$order) {
+            $order = $this->fallbackReturnOrder($service, $orderNo);
+            $orderNo = (string) ($order['order_no'] ?? $orderNo);
+        }
         if (!$order) {
             return [
                 'view' => 'payment/result',
@@ -204,7 +208,7 @@ class PaymentController
 
     public function status(): array
     {
-        $orderNo = (string) ($_GET['order_no'] ?? $_POST['order_no'] ?? '');
+        $orderNo = $this->requestOrderNo();
         $service = new PlatformService();
         $limitKey = 'payment_status:' . ($orderNo !== '' ? $orderNo : ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
         $limit = $service->throttle($limitKey, 18, 60);
@@ -258,5 +262,58 @@ class PaymentController
                 'order' => $order,
             ],
         ];
+    }
+
+    private function requestOrderNo(): string
+    {
+        foreach (['order_no', 'out_trade_no', 'outTradeNo', 'out_order_no', 'outOrderNo', 'merchant_order_no', 'merchantOrderNo'] as $key) {
+            $value = trim((string) ($_GET[$key] ?? $_POST[$key] ?? ''));
+            if ($value !== '') {
+                return $value;
+            }
+        }
+
+        return '';
+    }
+
+    private function fallbackReturnOrder(PlatformService $service, string $orderNo): ?array
+    {
+        $tradeNo = '';
+        foreach (['trade_no', 'tradeNo', 'transaction_id', 'transactionId', 'channel_order_no', 'channelOrderNo'] as $key) {
+            $tradeNo = trim((string) ($_GET[$key] ?? $_POST[$key] ?? ''));
+            if ($tradeNo !== '') {
+                break;
+            }
+        }
+
+        $currentUserId = $service->currentUserId();
+        $orders = array_reverse($service->orders());
+        foreach ($orders as $order) {
+            if ($orderNo !== '' && (string) ($order['order_no'] ?? '') === $orderNo) {
+                return $order;
+            }
+            if ($tradeNo !== '' && (string) ($order['gateway_trade_no'] ?? '') === $tradeNo) {
+                return $order;
+            }
+        }
+
+        $now = time();
+        foreach ($orders as $order) {
+            if ((int) ($order['user_id'] ?? 0) !== $currentUserId) {
+                continue;
+            }
+            if (!in_array((string) ($order['status'] ?? 'pending'), ['pending', 'paid'], true)) {
+                continue;
+            }
+            if (empty($order['gateway_payment_url']) && empty($order['gateway_trade_no'])) {
+                continue;
+            }
+            $createdAt = strtotime((string) ($order['created_at'] ?? ''));
+            if ($createdAt !== false && ($now - $createdAt) <= 3600) {
+                return $order;
+            }
+        }
+
+        return null;
     }
 }

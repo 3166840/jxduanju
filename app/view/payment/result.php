@@ -74,6 +74,70 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
 .payment-screen.has-mobile-checkout > .client-back-home {
     display: none !important;
 }
+.payment-screen.has-empty-result {
+    display: grid;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: max(26px, env(safe-area-inset-top)) 22px max(26px, env(safe-area-inset-bottom));
+    align-content: center;
+    gap: 18px;
+    background: #fff;
+}
+.payment-screen.has-empty-result > .payment-status-hero,
+.payment-screen.has-empty-result > .client-back-home {
+    display: none !important;
+}
+.payment-empty-state {
+    display: grid;
+    gap: 18px;
+    color: #171a21;
+}
+.payment-empty-mark {
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+    color: #fff;
+    background: #111318;
+    font-size: 24px;
+    font-weight: 950;
+}
+.payment-empty-state span {
+    color: #8a93a3;
+    font-size: 13px;
+    font-weight: 900;
+}
+.payment-empty-state h1 {
+    margin: 0;
+    max-width: 7em;
+    color: #111318;
+    font-size: 38px;
+    line-height: 1.08;
+    letter-spacing: 0;
+}
+.payment-empty-state p {
+    margin: 0;
+    color: #68707e;
+    font-size: 16px;
+    line-height: 1.7;
+}
+.payment-empty-actions {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+}
+.payment-empty-actions .btn {
+    width: 100%;
+    min-height: 52px;
+    justify-content: center;
+    border-radius: 12px;
+}
+.payment-empty-actions .btn.primary {
+    color: #fff;
+    background: #111318;
+    box-shadow: none;
+}
 .payment-mobile-checkout {
     position: relative;
     overflow: hidden;
@@ -636,7 +700,19 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
     color: #949ba8 !important;
 }
 </style>
-<main class="client-screen payment-screen<?= (!$isPaid && !empty($gateway['payment_url'])) ? ' has-mobile-checkout' : '' ?>">
+<main class="client-screen payment-screen<?= (!$isPaid && !empty($gateway['payment_url'])) ? ' has-mobile-checkout' : '' ?><?= empty($order) ? ' has-empty-result' : '' ?>">
+    <?php if (empty($order)): ?>
+        <section class="payment-empty-state">
+            <div class="payment-empty-mark">!</div>
+            <span>支付结果</span>
+            <h1>暂未找到订单</h1>
+            <p><?= htmlspecialchars((string) ($message ?? '没有拿到订单号，无法展示支付结果。')) ?></p>
+            <div class="payment-empty-actions">
+                <a class="btn primary" href="/?route=home">返回首页</a>
+            </div>
+        </section>
+    <?php endif; ?>
+
     <?php if (!$isPaid && !empty($gateway) && !empty($gateway['enabled']) && !empty($gateway['payment_url'])): ?>
         <section class="payment-mobile-checkout" data-payment-mobile-checkout>
             <div class="payment-mobile-checkout-head">

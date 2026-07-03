@@ -186,7 +186,9 @@ class PaymentGatewayService
         $json = $response['json'];
         $data = is_array($json['data'] ?? null) ? $json['data'] : [];
         $status = $this->queryStatus($data, $config);
-        $paid = (string) ($json['code'] ?? '') === '1' && $this->paymentStatusSucceeded($status, array_merge($json, $data), $config);
+        $queryPayload = array_merge($json, $data);
+        $queryPayload['expected_out_trade_no'] = (string) ($order['order_no'] ?? '');
+        $paid = (string) ($json['code'] ?? '') === '1' && $this->paymentStatusSucceeded($status, $queryPayload, $config);
         $remoteResponse = $json ?: $response['body'];
         $ok = (string) ($json['code'] ?? '') === '1';
         if ($paid) {
@@ -544,15 +546,15 @@ class PaymentGatewayService
     private function notifyStatus(array $payload, array $config): string
     {
         return $this->provider($config) === 'superpay'
-            ? $this->normalizeStatusText((string) ($payload['trade_status'] ?? $payload['status'] ?? $payload['pay_status'] ?? ''))
-            : $this->normalizeStatusText((string) ($payload['order_status'] ?? $payload['trade_status'] ?? $payload['pay_status'] ?? $payload['payment_status'] ?? $payload['status'] ?? $payload['state'] ?? ''));
+            ? $this->firstStatusText($payload, ['trade_status', 'status', 'pay_status'])
+            : $this->firstStatusText($payload, ['order_status', 'trade_status', 'pay_status', 'payment_status', 'status', 'state']);
     }
 
     private function queryStatus(array $data, array $config): string
     {
         return $this->provider($config) === 'superpay'
-            ? $this->normalizeStatusText((string) ($data['trade_status'] ?? $data['status'] ?? $data['pay_status'] ?? ''))
-            : $this->normalizeStatusText((string) ($data['order_status'] ?? $data['trade_status'] ?? $data['pay_status'] ?? $data['payment_status'] ?? $data['status'] ?? $data['state'] ?? ''));
+            ? $this->firstStatusText($data, ['trade_status', 'status', 'pay_status'])
+            : $this->firstStatusText($data, ['order_status', 'trade_status', 'pay_status', 'payment_status', 'status', 'state']);
     }
 
     private function refundQueryStatus(array $data, array $config): string
@@ -588,6 +590,10 @@ class PaymentGatewayService
         $normalized = $this->normalizeStatusText($status);
         if ($this->provider($config) === 'jingxiu') {
             if (in_array($normalized, ['SUCCESS', 'CALL_FAIL'], true)) {
+                return true;
+            }
+
+            if ($normalized === 'FALSE' && $this->jingxiuFalseQueryMeansPaid($payload)) {
                 return true;
             }
 
@@ -629,6 +635,7 @@ class PaymentGatewayService
             return match ($normalized) {
                 'SUCCESS' => '订单支付成功。',
                 'CALL_FAIL' => '支付成功，通道回调未成功返回，系统已按已支付处理。',
+                'FALSE' => $paid ? '支付成功，通道返回 false 状态，系统已按已支付处理。' : (string) ($json['msg'] ?? $error ?? '支付未完成。'),
                 'PROCESSING' => '订单待支付。',
                 'TIME_OUT', 'TIMEOUT' => '订单已过期。',
                 'FAIL', 'FAILED' => '订单支付失败。',
@@ -645,6 +652,52 @@ class PaymentGatewayService
     private function normalizeStatusText(string $status): string
     {
         return strtoupper(trim(str_replace(['-', ' '], '_', $status)));
+    }
+
+    private function firstStatusText(array $payload, array $keys): string
+    {
+        foreach ($keys as $key) {
+            if (!array_key_exists($key, $payload)) {
+                continue;
+            }
+            $value = $payload[$key];
+            if (is_bool($value)) {
+                return $value ? 'TRUE' : 'FALSE';
+            }
+            if (is_scalar($value)) {
+                return $this->normalizeStatusText((string) $value);
+            }
+        }
+
+        return '';
+    }
+
+    private function jingxiuFalseQueryMeansPaid(array $payload): bool
+    {
+        $outTradeNo = trim((string) ($payload['out_trade_no'] ?? ''));
+        $expectedOutTradeNo = trim((string) ($payload['expected_out_trade_no'] ?? ''));
+        if ($outTradeNo === '' || ($expectedOutTradeNo !== '' && $outTradeNo !== $expectedOutTradeNo)) {
+            return false;
+        }
+
+        $hasGatewayTrace = trim((string) (($payload['trade_no'] ?? '') ?: ($payload['ins_order_sn'] ?? '') ?: ($payload['channel_order_sn'] ?? ''))) !== '';
+        if (!$hasGatewayTrace) {
+            return false;
+        }
+
+        $text = '';
+        foreach (['order_status', 'trade_status', 'pay_status', 'payment_status', 'status', 'state', 'msg', 'message'] as $key) {
+            if (isset($payload[$key]) && is_scalar($payload[$key])) {
+                $text .= ' ' . $this->normalizeStatusText((string) $payload[$key]);
+            }
+        }
+        foreach (['WAIT_BUYER_PAY', 'PROCESSING', 'TIME_OUT', 'TIMEOUT', 'FAIL', 'FAILED', 'CLOSE', 'CLOSED', 'REFUND'] as $blocked) {
+            if (str_contains($text, $blocked)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function refundStatusSucceeded(string $status, array $data): bool
