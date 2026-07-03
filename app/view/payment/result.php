@@ -26,6 +26,8 @@ $paymentDisplay = !empty($order) ? $service->paymentDisplayForOrder((array) $ord
 $paymentMethodName = (string) (($gateway['payment_method_name'] ?? '') ?: ($paymentDisplay['method_name'] ?? '支付宝'));
 $paymentProviderName = (string) (($gateway['payment_provider_name'] ?? '') ?: ($paymentDisplay['provider_name'] ?? '精秀聚合支付'));
 $paymentChannelName = (string) (($gateway['payment_channel_name'] ?? '') ?: ($paymentDisplay['channel_name'] ?? '精秀主通道'));
+$paymentMethodCode = strtolower((string) (($gateway['payment_method'] ?? '') ?: ($order['payment_method'] ?? '') ?: ($order['gateway_trade_type'] ?? '')));
+$isAlipayPayment = str_contains($paymentMethodCode, 'alipay') || str_contains($paymentMethodName, '支付宝');
 $userAgent = (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
 $isMobileClient = (bool) preg_match('/Mobile|Android|iPhone|iPad|iPod|Windows Phone|MicroMessenger|AlipayClient/i', $userAgent);
 $statusLabels = [
@@ -53,6 +55,9 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
     display: none !important;
 }
 .view-payment-result .client-topbar {
+    display: none !important;
+}
+.view-payment-result .client-footer {
     display: none !important;
 }
 .view-payment-result.is-client:not(.view-frontend-home) .wrap {
@@ -496,6 +501,140 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
         font-weight: 900;
     }
 }
+
+/* Final mobile checkout skin: full-screen, no floating card. */
+.view-payment-result.is-client,
+.view-payment-result.is-client:not(.view-frontend-home) {
+    background: #ffffff !important;
+}
+.view-payment-result.is-client:not(.view-frontend-home) .wrap {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    padding: 0 !important;
+}
+.payment-screen.has-mobile-checkout {
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    place-items: stretch !important;
+    align-content: stretch !important;
+}
+.payment-mobile-checkout {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    margin: 0 !important;
+    padding: max(22px, env(safe-area-inset-top)) 20px max(22px, env(safe-area-inset-bottom)) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    grid-template-rows: auto auto auto 1fr auto auto;
+    align-content: start;
+}
+.payment-mobile-checkout::before {
+    content: none !important;
+}
+.payment-mobile-checkout-head {
+    padding: 2px 0 14px !important;
+    border-bottom: 1px solid #f0f1f5;
+}
+.payment-mobile-checkout-brand {
+    gap: 6px !important;
+}
+.payment-mobile-checkout-brand span {
+    color: #8f96a3 !important;
+    font-size: 13px !important;
+}
+.payment-mobile-checkout-brand strong {
+    font-size: 24px !important;
+    font-weight: 950 !important;
+}
+.payment-mobile-checkout-secure {
+    padding: 6px 9px !important;
+    border-radius: 10px !important;
+    color: #1f9d63 !important;
+    background: #eefaf3 !important;
+    font-size: 12px !important;
+}
+.payment-mobile-amount {
+    gap: 8px !important;
+    padding: 42px 0 32px !important;
+}
+.payment-mobile-amount span {
+    color: #7b828f !important;
+    font-size: 14px !important;
+}
+.payment-mobile-amount strong {
+    font-size: 50px !important;
+    font-weight: 950 !important;
+}
+.payment-mobile-amount small {
+    padding: 0 !important;
+    color: #b24a59 !important;
+    background: transparent !important;
+    font-size: 14px !important;
+}
+.payment-mobile-meta {
+    gap: 0 !important;
+    padding: 0 !important;
+    border-top: 1px solid #f0f1f5;
+    border-bottom: 1px solid #f0f1f5;
+    border-radius: 0 !important;
+    background: transparent !important;
+}
+.payment-mobile-meta div {
+    display: flex !important;
+    justify-content: space-between;
+    min-height: 50px !important;
+    padding: 0 !important;
+    border-bottom: 1px solid #f6f7fa;
+}
+.payment-mobile-meta div:last-child {
+    border-bottom: 0;
+}
+.payment-mobile-meta span {
+    color: #8b93a1 !important;
+    font-size: 14px !important;
+}
+.payment-mobile-meta strong {
+    color: #20242c !important;
+    font-size: 15px !important;
+}
+.payment-mobile-actions {
+    align-self: end;
+    gap: 12px !important;
+    padding-top: 24px;
+}
+.payment-mobile-actions .btn,
+.payment-mobile-actions button {
+    min-height: 52px !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+}
+.payment-mobile-actions .btn.primary {
+    background: #111318 !important;
+    box-shadow: none !important;
+}
+.payment-mobile-actions .btn.ghost {
+    color: #515a6a !important;
+    background: #f5f6f8 !important;
+    border-color: #f5f6f8 !important;
+}
+.payment-mobile-note {
+    margin-top: 8px !important;
+    padding: 0 !important;
+    color: #8b7352 !important;
+    background: transparent !important;
+    font-size: 13px !important;
+    text-align: center;
+}
+.payment-mobile-back {
+    margin-top: 4px;
+    color: #949ba8 !important;
+}
 </style>
 <main class="client-screen payment-screen<?= (!$isPaid && !empty($gateway['payment_url'])) ? ' has-mobile-checkout' : '' ?>">
     <?php if (!$isPaid && !empty($gateway) && !empty($gateway['enabled']) && !empty($gateway['payment_url'])): ?>
@@ -517,7 +656,7 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
                 <div><span>支付通道</span><strong><?= htmlspecialchars($paymentChannelName) ?></strong></div>
             </div>
             <div class="payment-mobile-actions">
-                <a class="btn primary" href="<?= htmlspecialchars((string) $gateway['payment_url']) ?>">立即支付</a>
+                <a class="btn primary" href="<?= htmlspecialchars((string) $gateway['payment_url']) ?>" data-payment-open data-payment-url="<?= htmlspecialchars((string) $gateway['payment_url']) ?>" data-payment-method="<?= $isAlipayPayment ? 'alipay' : 'default' ?>">立即支付</a>
                 <button class="btn ghost" type="button" data-check-payment>我已支付，查询结果</button>
             </div>
             <p class="payment-mobile-note" data-payment-state><?= $isTestOrder ? '付款后会自动查询测试订单状态。' : '付款后返回本页，会自动查询并发放权益。' ?></p>
@@ -598,7 +737,7 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
                             <p class="payment-mobile-only">当前是手机浏览器，请直接打开支付链接完成付款，付款后返回本页会自动查询结果。</p>
                         <?php endif; ?>
                         <div class="client-action-row">
-                            <a class="btn primary" href="<?= htmlspecialchars((string) $gateway['payment_url']) ?>">立即支付</a>
+                            <a class="btn primary" href="<?= htmlspecialchars((string) $gateway['payment_url']) ?>" data-payment-open data-payment-url="<?= htmlspecialchars((string) $gateway['payment_url']) ?>" data-payment-method="<?= $isAlipayPayment ? 'alipay' : 'default' ?>">立即支付</a>
                             <button class="btn ghost" type="button" data-check-payment>我已支付，立即查询</button>
                         </div>
                         <p class="payment-state-text" data-payment-state><?= $isTestOrder ? '系统会每 10 秒主动查询一次支付结果，成功后只标记测试订单，不发放权益。' : '系统会每 10 秒主动查询一次支付结果，成功后自动发放权益。' ?></p>
@@ -641,10 +780,12 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
     const orb = document.querySelector('[data-payment-orb]');
     const state = document.querySelector('[data-payment-state]');
     const button = document.querySelector('[data-check-payment]');
+    const payOpenLinks = Array.from(document.querySelectorAll('[data-payment-open]'));
     const paidActions = document.querySelector('[data-paid-actions]');
     const cashierCard = document.querySelector('[data-payment-cashier-card]');
     const modernCheckout = document.querySelector('[data-payment-mobile-checkout]');
-    const mobilePaymentUrl = cashierCard?.dataset.mobilePaymentUrl || '';
+    const mobilePaymentUrl = cashierCard?.dataset.mobilePaymentUrl || payOpenLinks[0]?.dataset.paymentUrl || '';
+    const isAlipayPayment = <?= $isAlipayPayment ? 'true' : 'false' ?>;
     const isMobileBrowser = /Mobile|Android|iPhone|iPad|iPod|Windows Phone|MicroMessenger|AlipayClient/i.test(navigator.userAgent)
         || window.matchMedia?.('(max-width: 760px), (pointer: coarse)')?.matches;
     const successCard = document.querySelector('[data-payment-success-card]');
@@ -759,6 +900,56 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
         }
     };
 
+    const openPaymentUrl = (paymentUrl) => {
+        if (!paymentUrl) {
+            return;
+        }
+        if (!isAlipayPayment || !isMobileBrowser) {
+            window.location.href = paymentUrl;
+            return;
+        }
+
+        setState('正在打开支付宝...');
+        const encodedPayUrl = encodeURIComponent(paymentUrl);
+        const schemes = [
+            `alipays://platformapi/startapp?appId=20000067&url=${encodedPayUrl}`,
+            `alipays://platformapi/startapp?saId=10000007&clientVersion=3.7.0.0718&qrcode=${encodedPayUrl}`
+        ];
+        let opened = false;
+        const markOpened = () => {
+            opened = true;
+        };
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                markOpened();
+            }
+        }, { once: true });
+        window.addEventListener('pagehide', markOpened, { once: true });
+
+        window.location.href = schemes[0];
+        setTimeout(() => {
+            if (!opened && document.visibilityState === 'visible') {
+                window.location.href = schemes[1];
+            }
+        }, 900);
+        setTimeout(() => {
+            if (!opened && document.visibilityState === 'visible') {
+                window.location.href = paymentUrl;
+            }
+        }, 1800);
+    };
+
+    payOpenLinks.forEach((link) => {
+        link.addEventListener('click', (event) => {
+            const paymentUrl = link.dataset.paymentUrl || link.href || '';
+            if (!paymentUrl || (!isAlipayPayment && !isMobileBrowser)) {
+                return;
+            }
+            event.preventDefault();
+            openPaymentUrl(paymentUrl);
+        });
+    });
+
     if (button) {
         button.addEventListener('click', () => checkPayment(true));
     }
@@ -780,7 +971,7 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
         }
         if (shouldAutoOpen) {
             setTimeout(() => {
-                window.location.href = mobilePaymentUrl;
+                openPaymentUrl(mobilePaymentUrl);
             }, 450);
         }
     }
