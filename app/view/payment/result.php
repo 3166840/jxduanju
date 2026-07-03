@@ -45,7 +45,107 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
 }
 ?>
 <style>
+.payment-cashier-card .client-section-head h2 {
+    word-break: keep-all;
+}
 @media (max-width: 760px), (pointer: coarse) {
+    .view-payment-result.is-client:not(.view-frontend-home) .wrap {
+        padding: 0 12px 48px !important;
+    }
+    .view-payment-result .client-topbar {
+        margin: 0 -12px 10px !important;
+        padding: 14px 16px !important;
+        border-radius: 0 0 22px 22px !important;
+        align-items: center !important;
+    }
+    .view-payment-result .client-topbar .brand {
+        font-size: 24px !important;
+        letter-spacing: 0 !important;
+    }
+    .view-payment-result .client-topbar .nav {
+        display: none !important;
+    }
+    .payment-screen {
+        gap: 12px !important;
+    }
+    .payment-screen .client-card,
+    .payment-screen .client-hero-card {
+        border-radius: 22px !important;
+        box-shadow: 0 10px 28px rgba(20, 24, 32, .08) !important;
+    }
+    .payment-status-hero {
+        min-height: 0 !important;
+        padding: 18px !important;
+        gap: 12px !important;
+        align-content: start !important;
+        background: linear-gradient(135deg, #fff, #fff6ef) !important;
+    }
+    .payment-status-orb {
+        right: 18px !important;
+        top: 18px !important;
+        width: 42px !important;
+        height: 42px !important;
+        border-radius: 16px !important;
+        box-shadow: 0 12px 22px rgba(239, 93, 99, .18) !important;
+    }
+    .payment-status-hero .eyebrow,
+    .payment-cashier-card .eyebrow {
+        width: fit-content !important;
+        padding: 7px 12px !important;
+        font-size: 12px !important;
+    }
+    .payment-status-hero h1 {
+        max-width: calc(100% - 56px) !important;
+        font-size: 34px !important;
+        line-height: 1.08 !important;
+        letter-spacing: 0 !important;
+    }
+    .payment-status-hero p {
+        margin: 0 !important;
+        font-size: 15px !important;
+        line-height: 1.55 !important;
+    }
+    .payment-hero-meta {
+        gap: 8px !important;
+    }
+    .payment-hero-meta strong {
+        order: -1;
+        width: 100%;
+        font-size: 34px !important;
+        line-height: 1 !important;
+        letter-spacing: 0 !important;
+    }
+    .payment-hero-meta span,
+    .payment-hero-meta em {
+        padding: 7px 10px !important;
+        background: #fff !important;
+    }
+    .payment-cashier-card.pay-panel {
+        padding: 18px !important;
+        gap: 16px !important;
+        border-color: rgba(239, 93, 99, .10) !important;
+        background: #fff !important;
+    }
+    .payment-cashier-card .client-section-head {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+        align-items: start !important;
+    }
+    .payment-cashier-card .client-section-head > span {
+        width: fit-content !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        border: 0 !important;
+        color: #9aa0aa !important;
+        background: transparent !important;
+        font-size: 13px !important;
+    }
+    .payment-cashier-card .client-section-head h2 {
+        font-size: 26px !important;
+        line-height: 1.15 !important;
+        letter-spacing: 0 !important;
+    }
     .payment-screen .qr-card,
     .payment-screen .payment-desktop-only {
         display: none !important;
@@ -60,6 +160,42 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
     .payment-screen h2.payment-mobile-only,
     .payment-screen p.payment-mobile-only {
         display: block !important;
+    }
+    .payment-guide {
+        gap: 14px !important;
+    }
+    .payment-guide h2 {
+        font-size: 28px !important;
+        line-height: 1.16 !important;
+        letter-spacing: 0 !important;
+    }
+    .payment-guide p {
+        font-size: 16px !important;
+        line-height: 1.7 !important;
+    }
+    .payment-guide .client-action-row {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+    }
+    .payment-guide .client-action-row .btn,
+    .payment-guide .client-action-row button {
+        width: 100% !important;
+        min-height: 52px !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        font-size: 16px !important;
+    }
+    .payment-state-text {
+        padding: 11px 12px !important;
+        border-radius: 14px !important;
+        font-size: 14px !important;
+        line-height: 1.55 !important;
+    }
+    .client-back-home {
+        margin-top: 0 !important;
+        min-height: 46px !important;
+        justify-content: center !important;
     }
 }
 </style>
@@ -107,7 +243,7 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
             <header class="client-section-head">
                 <div>
                     <span class="eyebrow">收银台</span>
-                    <h2><?= empty($gateway['error']) ? '使用' . htmlspecialchars($paymentMethodName) . '完成付款' : '支付下单未完成' ?></h2>
+                    <h2><?= empty($gateway['error']) ? htmlspecialchars($paymentMethodName) . '收银台' : '支付下单未完成' ?></h2>
                 </div>
                 <span><?= htmlspecialchars($paymentProviderName) ?> · <?= htmlspecialchars($paymentChannelName) ?></span>
             </header>
