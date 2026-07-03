@@ -45,6 +45,176 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
 }
 ?>
 <style>
+.view-payment-result.is-client {
+    color: #171a21 !important;
+    background: #f6f7fb !important;
+}
+.view-payment-result.is-client::before {
+    display: none !important;
+}
+.view-payment-result .client-topbar {
+    display: none !important;
+}
+.view-payment-result.is-client:not(.view-frontend-home) .wrap {
+    padding: max(18px, env(safe-area-inset-top)) 14px max(24px, env(safe-area-inset-bottom)) !important;
+}
+.payment-screen.has-mobile-checkout {
+    display: grid;
+    min-height: calc(100vh - 42px);
+    min-height: calc(100dvh - 42px);
+    place-items: center;
+}
+.payment-screen.has-mobile-checkout > .payment-status-hero,
+.payment-screen.has-mobile-checkout > .payment-cashier-card,
+.payment-screen.has-mobile-checkout > .client-back-home {
+    display: none !important;
+}
+.payment-mobile-checkout {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    gap: 16px;
+    width: min(100%, 430px);
+    padding: 20px;
+    border: 1px solid #eaedf3;
+    border-radius: 28px;
+    color: #171a21;
+    background: #fff;
+    box-shadow: 0 20px 50px rgba(18, 24, 38, .10);
+}
+.payment-mobile-checkout::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 86px;
+    background: linear-gradient(135deg, rgba(255, 126, 70, .12), rgba(75, 194, 129, .10));
+    pointer-events: none;
+}
+.payment-mobile-checkout > * {
+    position: relative;
+}
+.payment-mobile-checkout-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.payment-mobile-checkout-brand {
+    display: grid;
+    gap: 4px;
+}
+.payment-mobile-checkout-brand span,
+.payment-mobile-checkout-secure {
+    color: #8a93a3;
+    font-size: 12px;
+    font-weight: 900;
+}
+.payment-mobile-checkout-brand strong {
+    color: #171a21;
+    font-size: 22px;
+    line-height: 1.1;
+    letter-spacing: 0;
+}
+.payment-mobile-checkout-secure {
+    padding: 7px 10px;
+    border-radius: 999px;
+    color: #2d9f66;
+    background: #edf8f2;
+    white-space: nowrap;
+}
+.payment-mobile-amount {
+    display: grid;
+    gap: 10px;
+    padding: 24px 0 8px;
+    text-align: center;
+}
+.payment-mobile-amount span {
+    color: #7d8593;
+    font-size: 13px;
+    font-weight: 900;
+}
+.payment-mobile-amount strong {
+    color: #111318;
+    font-size: 48px;
+    line-height: 1;
+    letter-spacing: 0;
+}
+.payment-mobile-amount small {
+    justify-self: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    color: #bf4756;
+    background: #fff0f2;
+    font-size: 12px;
+    font-weight: 900;
+}
+.payment-mobile-meta {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 18px;
+    background: #f7f8fb;
+}
+.payment-mobile-meta div {
+    display: grid;
+    grid-template-columns: 74px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    min-height: 28px;
+}
+.payment-mobile-meta span {
+    color: #8e96a5;
+    font-size: 12px;
+    font-weight: 900;
+}
+.payment-mobile-meta strong {
+    min-width: 0;
+    overflow: hidden;
+    color: #222630;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.payment-mobile-actions {
+    display: grid;
+    gap: 10px;
+}
+.payment-mobile-actions .btn,
+.payment-mobile-actions button {
+    width: 100%;
+    min-height: 54px;
+    justify-content: center;
+    border-radius: 18px;
+    white-space: nowrap;
+    font-size: 16px;
+}
+.payment-mobile-actions .btn.primary {
+    color: #fff;
+    background: linear-gradient(135deg, #ff7d45, #ef5d63);
+    box-shadow: 0 14px 26px rgba(239, 93, 99, .22);
+}
+.payment-mobile-actions .btn.ghost {
+    color: #5266ad;
+    background: #f3f6ff;
+    border-color: #e6ebff;
+    box-shadow: none;
+}
+.payment-mobile-note {
+    margin: 0;
+    padding: 11px 12px;
+    border-radius: 16px;
+    color: #735821;
+    background: #fff7e8;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.55;
+}
+.payment-mobile-back {
+    justify-self: center;
+    color: #858e9d;
+    font-size: 13px;
+    font-weight: 900;
+}
 .payment-cashier-card .client-section-head h2 {
     word-break: keep-all;
 }
@@ -53,20 +223,18 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
         padding: 0 12px 48px !important;
     }
     .view-payment-result .client-topbar {
-        margin: 0 -12px 10px !important;
-        padding: 14px 16px !important;
-        border-radius: 0 0 22px 22px !important;
-        align-items: center !important;
+        display: none !important;
     }
-    .view-payment-result .client-topbar .brand {
-        font-size: 24px !important;
-        letter-spacing: 0 !important;
-    }
-    .view-payment-result .client-topbar .nav {
+    .payment-screen.has-mobile-checkout .payment-status-hero,
+    .payment-screen.has-mobile-checkout .payment-cashier-card,
+    .payment-screen.has-mobile-checkout .client-back-home {
         display: none !important;
     }
     .payment-screen {
-        gap: 12px !important;
+        gap: 0 !important;
+        min-height: calc(100vh - 48px);
+        min-height: calc(100dvh - 48px);
+        justify-content: center;
     }
     .payment-screen .client-card,
     .payment-screen .client-hero-card {
@@ -197,9 +365,166 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
         min-height: 46px !important;
         justify-content: center !important;
     }
+    .payment-mobile-checkout {
+        display: grid;
+        gap: 14px;
+        width: 100%;
+        max-width: 420px;
+        margin: 10px auto 0;
+        padding: 18px;
+        border: 1px solid rgba(229, 232, 238, .92);
+        border-radius: 26px;
+        color: #16181d;
+        background: #fff;
+        box-shadow: 0 18px 42px rgba(20, 24, 32, .10);
+    }
+    .payment-mobile-checkout-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    .payment-mobile-checkout-brand {
+        display: grid;
+        gap: 4px;
+    }
+    .payment-mobile-checkout-brand span,
+    .payment-mobile-checkout-secure {
+        color: #8b93a1;
+        font-size: 12px;
+        font-weight: 900;
+    }
+    .payment-mobile-checkout-brand strong {
+        font-size: 22px;
+        line-height: 1.1;
+        letter-spacing: 0;
+    }
+    .payment-mobile-checkout-secure {
+        padding: 7px 10px;
+        border-radius: 999px;
+        color: #39a36f;
+        background: #edf9f2;
+        white-space: nowrap;
+    }
+    .payment-mobile-amount {
+        display: grid;
+        gap: 9px;
+        padding: 22px 0 10px;
+        text-align: center;
+    }
+    .payment-mobile-amount span {
+        color: #8b93a1;
+        font-size: 13px;
+        font-weight: 900;
+    }
+    .payment-mobile-amount strong {
+        color: #111318;
+        font-size: 46px;
+        line-height: 1;
+        letter-spacing: 0;
+    }
+    .payment-mobile-amount small {
+        color: #c9505d;
+        font-size: 13px;
+        font-weight: 900;
+    }
+    .payment-mobile-meta {
+        display: grid;
+        gap: 8px;
+        padding: 12px;
+        border-radius: 18px;
+        background: #f7f8fb;
+    }
+    .payment-mobile-meta div {
+        display: grid;
+        grid-template-columns: 74px minmax(0, 1fr);
+        gap: 10px;
+        align-items: center;
+        min-height: 28px;
+    }
+    .payment-mobile-meta span {
+        color: #9299a6;
+        font-size: 12px;
+        font-weight: 900;
+    }
+    .payment-mobile-meta strong {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: #242832;
+        font-size: 14px;
+    }
+    .payment-mobile-actions {
+        display: grid;
+        gap: 10px;
+    }
+    .payment-mobile-actions .btn,
+    .payment-mobile-actions button {
+        width: 100%;
+        min-height: 54px;
+        justify-content: center;
+        border-radius: 18px;
+        white-space: nowrap;
+        font-size: 16px;
+    }
+    .payment-mobile-actions .btn.primary {
+        color: #fff;
+        background: linear-gradient(135deg, #ff7f45, #f05d5f);
+        box-shadow: 0 14px 26px rgba(240, 93, 95, .22);
+    }
+    .payment-mobile-actions .btn.ghost {
+        color: #5266ad;
+        background: #f3f6ff;
+        border-color: #e6ebff;
+        box-shadow: none;
+    }
+    .payment-mobile-note {
+        margin: 0;
+        padding: 11px 12px;
+        border-radius: 16px;
+        color: #7a5a21;
+        background: #fff7e8;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.55;
+    }
+    .payment-mobile-back {
+        justify-self: center;
+        color: #8b93a1;
+        font-size: 13px;
+        font-weight: 900;
+    }
 }
 </style>
-<main class="client-screen payment-screen">
+<main class="client-screen payment-screen<?= (!$isPaid && !empty($gateway['payment_url'])) ? ' has-mobile-checkout' : '' ?>">
+    <?php if (!$isPaid && !empty($gateway) && !empty($gateway['enabled']) && !empty($gateway['payment_url'])): ?>
+        <section class="payment-mobile-checkout" data-payment-mobile-checkout>
+            <div class="payment-mobile-checkout-head">
+                <div class="payment-mobile-checkout-brand">
+                    <span><?= $isTestOrder ? '支付通道测试' : '精秀短剧' ?></span>
+                    <strong><?= htmlspecialchars($paymentMethodName) ?>收银台</strong>
+                </div>
+                <span class="payment-mobile-checkout-secure">安全支付</span>
+            </div>
+            <div class="payment-mobile-amount">
+                <span><?= htmlspecialchars($orderTypeLabel) ?></span>
+                <strong>￥<?= htmlspecialchars((string) ($order['amount'] ?? 0)) ?></strong>
+                <small data-payment-status-text><?= htmlspecialchars($statusLabels[$displayStatus] ?? $displayStatus) ?></small>
+            </div>
+            <div class="payment-mobile-meta">
+                <div><span>支付方式</span><strong><?= htmlspecialchars($paymentMethodName) ?></strong></div>
+                <div><span>支付通道</span><strong><?= htmlspecialchars($paymentChannelName) ?></strong></div>
+            </div>
+            <div class="payment-mobile-actions">
+                <a class="btn primary" href="<?= htmlspecialchars((string) $gateway['payment_url']) ?>">立即支付</a>
+                <button class="btn ghost" type="button" data-check-payment>我已支付，查询结果</button>
+            </div>
+            <p class="payment-mobile-note" data-payment-state><?= $isTestOrder ? '付款后会自动查询测试订单状态。' : '付款后返回本页，会自动查询并发放权益。' ?></p>
+            <a class="payment-mobile-back" href="<?= $isTestOrder ? '/jxdjadmin#payment-channel' : '/?route=home' ?>"><?= $isTestOrder ? '返回支付通道' : '返回首页' ?></a>
+        </section>
+    <?php endif; ?>
+
     <section class="client-hero-card payment-status-hero">
         <span class="payment-status-orb <?= $isPaid ? 'is-paid' : '' ?>" data-payment-orb></span>
         <span class="eyebrow"><?= $isTestOrder ? '支付通道测试收银台' : '精秀短剧收银台' ?></span>
@@ -318,6 +643,7 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
     const button = document.querySelector('[data-check-payment]');
     const paidActions = document.querySelector('[data-paid-actions]');
     const cashierCard = document.querySelector('[data-payment-cashier-card]');
+    const modernCheckout = document.querySelector('[data-payment-mobile-checkout]');
     const mobilePaymentUrl = cashierCard?.dataset.mobilePaymentUrl || '';
     const isMobileBrowser = /Mobile|Android|iPhone|iPad|iPod|Windows Phone|MicroMessenger|AlipayClient/i.test(navigator.userAgent)
         || window.matchMedia?.('(max-width: 760px), (pointer: coarse)')?.matches;
@@ -350,6 +676,9 @@ if (!empty($gateway['payment_url']) && !$isMobileClient) {
         setState(message || (isTestOrder ? '测试支付成功，测试订单状态已更新。' : '支付成功，权益已自动发放。'));
         if (cashierCard) {
             cashierCard.style.display = 'none';
+        }
+        if (modernCheckout) {
+            modernCheckout.style.display = 'none';
         }
         if (successCard) {
             successCard.style.display = '';
