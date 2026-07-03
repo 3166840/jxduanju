@@ -1,0 +1,18 @@
+.DS_Store
+
+# Local secrets
+config/mysql.local.env
+
+# Runtime data, logs, backups and deployment keys/packages
+runtime/
+log/
+
+# Local development binaries and archives
+tools/frankenphp
+tools/spc
+tools/spc-macos-aarch64.tar.gz
+tools/micromamba.tar.bz2
+
+# Dependency/build folders
+vendor/
+node_modules/
