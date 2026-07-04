@@ -4,13 +4,19 @@ $episodes = array_values((array) ($drama['episodes'] ?? []));
 $episodeCount = count($episodes);
 $freeCount = count(array_filter($episodes, static fn (array $episode): bool => !empty($episode['is_free'])));
 $unlockedCount = 0;
+$firstLockedEpisodeId = 0;
 foreach ($episodes as $episode) {
-    if (!empty($episode_access[(int) ($episode['id'] ?? 0)]) || !empty($has_membership)) {
+    $episodeIdForAccess = (int) ($episode['id'] ?? 0);
+    $episodeUnlocked = !empty($episode_access[$episodeIdForAccess]) || !empty($has_membership);
+    if ($episodeUnlocked) {
         $unlockedCount++;
+    } elseif ($firstLockedEpisodeId <= 0) {
+        $firstLockedEpisodeId = $episodeIdForAccess;
     }
 }
 $firstEpisode = $episodes[0] ?? null;
 $firstEpisodeId = (int) ($firstEpisode['id'] ?? 0);
+$firstBuyEpisodeId = $firstLockedEpisodeId > 0 ? $firstLockedEpisodeId : $firstEpisodeId;
 $dramaId = (int) ($drama['id'] ?? 1);
 $cover = (string) (($drama['cover'] ?? '') ?: '/assets/cover-1.svg');
 $statusLabel = (($drama['status'] ?? 'online') === 'online') ? '热播中' : '已下架';
@@ -24,6 +30,13 @@ foreach ($paymentRoutes as $route) {
 }
 $defaultPaymentRouteId = $defaultPaymentRouteId ?: (string) ($paymentRoutes[0]['id'] ?? '');
 $routeParam = static fn (string $routeId): string => $routeId !== '' ? '&payment_route_id=' . rawurlencode($routeId) : '';
+$singleUnlockLink = '';
+if ($firstBuyEpisodeId > 0) {
+    $singleUnlockLink = $firstLockedEpisodeId > 0
+        ? '/?route=buy-episode&drama_id=' . $dramaId . '&episode_id=' . $firstBuyEpisodeId . $routeParam($defaultPaymentRouteId)
+        : '/?route=watch&drama_id=' . $dramaId . '&episode_id=' . $firstBuyEpisodeId;
+}
+$membershipUnlockLink = '/?route=buy-membership&drama_id=' . $dramaId . $routeParam($defaultPaymentRouteId);
 ?>
 <main class="client-screen drama-detail-screen">
     <section class="client-hero-card drama-detail-hero">
@@ -32,9 +45,11 @@ $routeParam = static fn (string $routeId): string => $routeId !== '' ? '&payment
             <span class="detail-badge"><?= htmlspecialchars($statusLabel) ?></span>
         </div>
         <div class="detail-copy">
-            <span class="eyebrow">短剧详情</span>
-            <h1><?= htmlspecialchars($drama['title'] ?? '未找到剧集') ?></h1>
-            <p><?= htmlspecialchars($drama['description'] ?? '精彩短剧正在准备中。') ?></p>
+            <div class="detail-title-block">
+                <span class="eyebrow">短剧详情</span>
+                <h1><?= htmlspecialchars($drama['title'] ?? '未找到剧集') ?></h1>
+                <p><?= htmlspecialchars($drama['description'] ?? '精彩短剧正在准备中。') ?></p>
+            </div>
             <div class="client-stat-grid">
                 <span><strong><?= number_format($episodeCount) ?></strong><em>总集数</em></span>
                 <span><strong><?= number_format($freeCount) ?></strong><em>可试看</em></span>
@@ -49,16 +64,36 @@ $routeParam = static fn (string $routeId): string => $routeId !== '' ? '&payment
         </div>
     </section>
 
-    <?php if (!empty($paymentRoutes)): ?>
-        <section class="client-card payment-route-picker" data-payment-route-picker>
-            <header class="client-section-head">
-                <div>
-                    <span class="eyebrow">支付方式</span>
-                    <h2><?= count($paymentRoutes) > 1 ? '选择付款方式' : '默认付款方式' ?></h2>
-                </div>
+    <section class="client-card drama-purchase-panel" data-payment-route-picker>
+        <header class="client-section-head">
+            <div>
+                <span class="eyebrow">购买方式</span>
+                <h2>解锁观看</h2>
+            </div>
+            <span><?= !empty($has_membership) ? '会员有效' : '任选一种' ?></span>
+        </header>
+
+        <div class="purchase-price-grid">
+            <?php if ($firstBuyEpisodeId > 0): ?>
+                <a class="purchase-price-option <?= $firstLockedEpisodeId > 0 ? 'js-buy-link' : '' ?>" href="<?= htmlspecialchars($singleUnlockLink) ?>">
+                    <span>单集解锁</span>
+                    <strong>￥<?= htmlspecialchars((string) ($drama['price_per_episode'] ?? 0)) ?></strong>
+                    <em><?= $firstLockedEpisodeId > 0 ? '解锁下一集' : '已解锁可回看' ?></em>
+                </a>
+            <?php endif; ?>
+            <a class="purchase-price-option is-featured js-buy-link" href="<?= htmlspecialchars($membershipUnlockLink) ?>">
+                <span>会员畅看</span>
+                <strong>￥<?= htmlspecialchars((string) ($drama['membership_price'] ?? 0)) ?></strong>
+                <em><?= !empty($has_membership) ? '当前会员有效' : '整部短剧畅看' ?></em>
+            </a>
+        </div>
+
+        <?php if (!empty($paymentRoutes)): ?>
+            <div class="purchase-route-head">
+                <strong><?= count($paymentRoutes) > 1 ? '支付方式' : '默认支付' ?></strong>
                 <span><?= htmlspecialchars((string) ($paymentRoutes[0]['provider_name'] ?? '支付通道')) ?></span>
-            </header>
-            <div class="payment-route-options">
+            </div>
+            <div class="payment-route-options detail-payment-routes">
                 <?php foreach ($paymentRoutes as $index => $route): ?>
                     <?php
                     $routeId = (string) ($route['id'] ?? '');
@@ -74,18 +109,9 @@ $routeParam = static fn (string $routeId): string => $routeId !== '' ? '&payment
                     </label>
                 <?php endforeach; ?>
             </div>
-        </section>
-    <?php endif; ?>
-
-    <section class="mini-benefit-strip">
-        <div>
-            <strong>单集 ￥<?= htmlspecialchars((string) ($drama['price_per_episode'] ?? 0)) ?></strong>
-            <span>喜欢哪集买哪集</span>
-        </div>
-        <div>
-            <strong>会员 ￥<?= htmlspecialchars((string) ($drama['membership_price'] ?? 0)) ?></strong>
-            <span><?= !empty($has_membership) ? '当前会员有效' : '整部短剧畅看' ?></span>
-        </div>
+        <?php else: ?>
+            <p class="muted">暂无可用支付方式，请稍后再试。</p>
+        <?php endif; ?>
     </section>
 
     <section class="client-card episode-section">

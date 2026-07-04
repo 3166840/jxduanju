@@ -5535,6 +5535,247 @@ if (!function_exists('jx_payment_icon')) {
             font-size: 13px;
             box-shadow: none;
         }
+        .drama-detail-screen {
+            gap: 12px;
+        }
+        .drama-detail-screen h1,
+        .drama-detail-screen h2,
+        .drama-detail-screen h3 {
+            letter-spacing: 0;
+        }
+        .drama-detail-screen .client-card,
+        .drama-detail-screen .client-hero-card {
+            border-color: rgba(226, 231, 238, .92);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, .96);
+            box-shadow: 0 10px 26px rgba(24, 31, 42, .06);
+        }
+        .drama-detail-screen .drama-detail-hero {
+            grid-template-columns: 156px minmax(0, 1fr);
+            gap: 14px;
+            align-items: stretch;
+            padding: 12px;
+            background: #fff;
+        }
+        .drama-detail-screen .detail-poster-wrap {
+            min-height: auto;
+            aspect-ratio: 3 / 4;
+            border-radius: 14px;
+            box-shadow: none;
+        }
+        .drama-detail-screen .detail-badge {
+            left: 9px;
+            top: 9px;
+            padding: 5px 8px;
+            background: rgba(239, 93, 99, .94);
+            box-shadow: none;
+        }
+        .drama-detail-screen .detail-copy {
+            align-content: start;
+            gap: 10px;
+            padding: 3px 0;
+        }
+        .drama-detail-screen .detail-title-block {
+            display: grid;
+            gap: 7px;
+            min-width: 0;
+        }
+        .drama-detail-screen .detail-copy h1 {
+            font-size: 24px;
+            line-height: 1.18;
+        }
+        .drama-detail-screen .detail-copy p {
+            color: #6d7480;
+            line-height: 1.55;
+            -webkit-line-clamp: 2;
+        }
+        .drama-detail-screen .client-stat-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .drama-detail-screen .client-stat-grid span {
+            flex: 1 1 74px;
+            gap: 1px;
+            padding: 8px 7px;
+            border-radius: 10px;
+            background: #f6f7f9;
+        }
+        .drama-detail-screen .client-stat-grid strong {
+            font-size: 16px;
+        }
+        .drama-detail-screen .client-stat-grid em {
+            color: #818895;
+            font-size: 11px;
+        }
+        .drama-detail-screen .client-action-row {
+            gap: 8px;
+        }
+        .drama-detail-screen .client-action-row .btn {
+            flex: 1 1 0;
+            min-height: 42px;
+            border-radius: 13px;
+            box-shadow: none;
+        }
+        .drama-purchase-panel {
+            gap: 12px;
+            padding: 14px;
+        }
+        .purchase-price-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 9px;
+        }
+        .purchase-price-option {
+            display: grid;
+            gap: 4px;
+            min-width: 0;
+            padding: 12px;
+            border: 1px solid #e8edf4;
+            border-radius: 14px;
+            background: #f8fafc;
+        }
+        .purchase-price-option span,
+        .purchase-price-option strong,
+        .purchase-price-option em {
+            overflow: hidden;
+            min-width: 0;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .purchase-price-option span {
+            color: #6f7682;
+            font-size: 12px;
+            font-weight: 900;
+        }
+        .purchase-price-option strong {
+            color: #16191f;
+            font-size: 21px;
+            font-weight: 950;
+        }
+        .purchase-price-option em {
+            color: #8c94a1;
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 800;
+        }
+        .purchase-price-option.is-featured {
+            border-color: rgba(239, 93, 99, .28);
+            background: #fff4f1;
+        }
+        .purchase-price-option.is-featured strong {
+            color: #e9554f;
+        }
+        .purchase-route-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            min-width: 0;
+            padding-top: 2px;
+        }
+        .purchase-route-head strong,
+        .purchase-route-head span {
+            overflow: hidden;
+            min-width: 0;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        .purchase-route-head strong {
+            color: #1d2129;
+            font-size: 14px;
+        }
+        .purchase-route-head span {
+            color: #9aa2af;
+            font-size: 12px;
+            font-weight: 800;
+        }
+        .drama-detail-screen .detail-payment-routes {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        .drama-detail-screen .detail-payment-routes .payment-route-option {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            grid-template-areas:
+                "radio head"
+                "radio note";
+            column-gap: 10px;
+            row-gap: 2px;
+            align-items: center;
+            padding: 10px 12px;
+            border-color: #e7ecf3;
+            border-radius: 13px;
+            background: #fff;
+            box-shadow: none;
+        }
+        .drama-detail-screen .detail-payment-routes .payment-route-option input {
+            position: static;
+            grid-area: radio;
+            margin: 0;
+        }
+        .drama-detail-screen .detail-payment-routes .payment-route-head {
+            grid-area: head;
+        }
+        .drama-detail-screen .detail-payment-routes .payment-route-option > span {
+            grid-area: note;
+        }
+        .drama-detail-screen .detail-payment-routes .payment-route-option.is-active {
+            border-color: rgba(239, 93, 99, .42);
+            background: #fff8f6;
+            box-shadow: none;
+        }
+        .drama-detail-screen .episode-section {
+            gap: 10px;
+            padding: 14px;
+        }
+        .drama-detail-screen .episode-card-list {
+            gap: 0;
+            border-top: 1px solid #eef1f5;
+        }
+        .drama-detail-screen .client-episode-card {
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 10px;
+            padding: 11px 0;
+            border-width: 0 0 1px;
+            border-color: #eef1f5;
+            border-radius: 0;
+            background: transparent;
+        }
+        .drama-detail-screen .client-episode-card:last-child {
+            border-bottom-width: 0;
+        }
+        .drama-detail-screen .client-episode-card.is-locked {
+            background: transparent;
+            border-color: #eef1f5;
+        }
+        .drama-detail-screen .episode-play-link {
+            grid-template-columns: 36px minmax(0, 1fr);
+            gap: 9px;
+        }
+        .drama-detail-screen .episode-index {
+            width: 36px;
+            height: 36px;
+            border-radius: 11px;
+            background: #fff0f1;
+            font-size: 13px;
+        }
+        .drama-detail-screen .episode-play-link strong {
+            font-size: 14px;
+        }
+        .drama-detail-screen .episode-play-link em {
+            margin-top: 3px;
+            font-size: 12px;
+        }
+        .drama-detail-screen .episode-actions {
+            gap: 6px;
+        }
+        .drama-detail-screen .episode-actions .btn {
+            min-height: 32px;
+            padding: 7px 10px;
+            border-radius: 11px;
+            font-size: 12px;
+        }
         .watch-player-card {
             display: grid;
             gap: 0;
@@ -8383,6 +8624,54 @@ if (!function_exists('jx_payment_icon')) {
             .payment-qr-grid h2.payment-mobile-only,
             .payment-qr-grid p.payment-mobile-only { display: block !important; }
             .payment-guide { justify-items: stretch; width: 100%; }
+            .drama-detail-screen {
+                gap: 10px;
+            }
+            .drama-detail-screen .client-card,
+            .drama-detail-screen .client-hero-card {
+                border-radius: 16px;
+                box-shadow: 0 8px 20px rgba(24, 31, 42, .05);
+            }
+            .drama-detail-screen .drama-detail-hero {
+                grid-template-columns: 1fr;
+                gap: 0;
+                padding: 0;
+            }
+            .drama-detail-screen .detail-poster-wrap {
+                width: 100%;
+                aspect-ratio: 16 / 10;
+                border-radius: 16px 16px 0 0;
+            }
+            .drama-detail-screen .detail-copy {
+                gap: 11px;
+                padding: 13px;
+            }
+            .drama-detail-screen .detail-copy h1 {
+                font-size: 24px;
+                line-height: 1.2;
+            }
+            .drama-detail-screen .detail-copy p {
+                font-size: 14px;
+                line-height: 1.55;
+                -webkit-line-clamp: 2;
+            }
+            .drama-detail-screen .client-action-row .btn {
+                min-height: 43px;
+            }
+            .drama-purchase-panel {
+                padding: 13px;
+            }
+            .drama-detail-screen .episode-section {
+                padding: 13px;
+            }
+            .drama-detail-screen .client-episode-card {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            .drama-detail-screen .episode-actions .btn {
+                flex: 1 1 0;
+                justify-content: center;
+            }
         }
         @media (max-width: 430px) {
             .drama-detail-hero { grid-template-columns: 128px minmax(0, 1fr); gap: 12px; }
@@ -8434,6 +8723,32 @@ if (!function_exists('jx_payment_icon')) {
             .account-center-hero-actions { grid-template-columns: 1fr; }
             .account-list-row { grid-template-columns: 1fr; align-items: start; }
             .account-list-row b { width: fit-content; }
+            .drama-detail-screen .drama-detail-hero {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .drama-detail-screen .detail-poster-wrap {
+                min-height: auto;
+                border-radius: 16px 16px 0 0;
+            }
+            .drama-detail-screen .detail-copy {
+                gap: 10px;
+            }
+            .drama-detail-screen .detail-copy h1 {
+                font-size: 23px;
+            }
+            .drama-detail-screen .purchase-price-grid {
+                gap: 8px;
+            }
+            .drama-detail-screen .purchase-price-option {
+                padding: 11px 10px;
+            }
+            .drama-detail-screen .purchase-price-option strong {
+                font-size: 19px;
+            }
+            .drama-detail-screen .detail-payment-routes .payment-route-option {
+                padding: 10px;
+            }
         }
         .view-frontend-duanju.is-client,
         .view-frontend-juchang.is-client,
