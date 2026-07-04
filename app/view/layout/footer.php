@@ -36,8 +36,14 @@ $footerIcpNumber = trim((string) ($site_config['icp_number'] ?? ''));
     }
 
     let hideTimer = null;
+    let showDelayTimer = null;
+    let slowTimer = null;
+    let staleTimer = null;
     let submitLockTimer = null;
     const defaultText = loaderText?.textContent || '页面加载中...';
+    const loadingDelay = 320;
+    const slowNoticeDelay = 8000;
+    const staleNoticeDelay = 12000;
 
     const setText = (text) => {
         if (loaderText) {
@@ -46,20 +52,40 @@ $footerIcpNumber = trim((string) ($site_config['icp_number'] ?? ''));
     };
     const show = (text = defaultText) => {
         window.clearTimeout(hideTimer);
+        window.clearTimeout(showDelayTimer);
+        window.clearTimeout(slowTimer);
+        window.clearTimeout(staleTimer);
         setText(text);
+        loader.classList.remove('is-stale');
         loader.classList.add('is-visible');
         loader.setAttribute('aria-busy', 'true');
         document.body.classList.add('is-page-loading');
+        slowTimer = window.setTimeout(() => {
+            setText('网络较慢，仍在打开...');
+        }, slowNoticeDelay);
+        staleTimer = window.setTimeout(() => {
+            setText('打开较慢，可返回或重试');
+            loader.classList.add('is-stale');
+            document.body.classList.remove('is-page-loading');
+        }, staleNoticeDelay);
+    };
+    const showDelayed = (text = defaultText, delay = loadingDelay) => {
+        window.clearTimeout(showDelayTimer);
+        showDelayTimer = window.setTimeout(() => show(text), delay);
     };
     const hide = () => {
         window.clearTimeout(hideTimer);
+        window.clearTimeout(showDelayTimer);
+        window.clearTimeout(slowTimer);
+        window.clearTimeout(staleTimer);
         loader.classList.remove('is-visible');
+        loader.classList.remove('is-stale');
         loader.setAttribute('aria-busy', 'false');
         document.body.classList.remove('is-page-loading');
         hideTimer = window.setTimeout(() => setText(defaultText), 260);
     };
 
-    window.JXPageLoader = { show, hide };
+    window.JXPageLoader = { show, showDelayed, hide };
     globalThis.JXPageLoader = window.JXPageLoader;
 
     const hideWhenReady = () => {
@@ -74,7 +100,7 @@ $footerIcpNumber = trim((string) ($site_config['icp_number'] ?? ''));
     window.addEventListener('pageshow', hide);
     const showOnLeaving = () => {
         if (!loader.classList.contains('is-visible')) {
-            show(defaultText);
+            showDelayed(defaultText);
         }
     };
     window.addEventListener('pagehide', showOnLeaving);
@@ -117,7 +143,7 @@ $footerIcpNumber = trim((string) ($site_config['icp_number'] ?? ''));
             return;
         }
 
-        show('正在打开...');
+        showDelayed('正在打开...');
         window.setTimeout(() => {
             if (event.defaultPrevented) {
                 hide();
@@ -149,7 +175,7 @@ $footerIcpNumber = trim((string) ($site_config['icp_number'] ?? ''));
             return;
         }
 
-        show('正在提交...');
+        showDelayed('正在提交...');
         const submitter = event.submitter instanceof HTMLButtonElement || event.submitter instanceof HTMLInputElement
             ? event.submitter
             : form.querySelector('button[type="submit"], input[type="submit"]');

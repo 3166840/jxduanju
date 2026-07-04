@@ -1,5 +1,37 @@
 <?php
 
+$requestStartedAt = microtime(true);
+$routeForSlowLog = '';
+register_shutdown_function(static function () use ($requestStartedAt, &$routeForSlowLog): void {
+    $elapsedMs = (int) round((microtime(true) - $requestStartedAt) * 1000);
+    $thresholdMs = max(500, (int) (getenv('JX_SLOW_REQUEST_MS') ?: 1500));
+    if ($elapsedMs < $thresholdMs) {
+        return;
+    }
+
+    $logDir = __DIR__ . '/../log';
+    if (!is_dir($logDir)) {
+        @mkdir($logDir, 0775, true);
+    }
+
+    $uri = substr((string) ($_SERVER['REQUEST_URI'] ?? ''), 0, 500);
+    $method = (string) ($_SERVER['REQUEST_METHOD'] ?? 'GET');
+    $status = http_response_code();
+    $status = $status > 0 ? $status : 200;
+    $route = $routeForSlowLog !== '' ? $routeForSlowLog : (string) ($_GET['route'] ?? '');
+    $line = sprintf(
+        "[%s] %dms status=%d method=%s route=%s uri=%s memory=%s\n",
+        date('Y-m-d H:i:s'),
+        $elapsedMs,
+        $status,
+        $method,
+        $route !== '' ? $route : '-',
+        $uri !== '' ? $uri : '/',
+        number_format(memory_get_peak_usage(true))
+    );
+    @file_put_contents($logDir . '/slow-request.log', $line, FILE_APPEND);
+});
+
 if (PHP_SAPI === 'cli-server') {
     $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     $file = __DIR__ . $path;
@@ -110,6 +142,7 @@ $route = match ($path) {
     '/api/messages/delete' => 'api-in-app-message-delete',
     default => $prettyLandingSlug !== null ? 'landing-page' : ($prettyYulanId !== null ? 'yulan' : ($_GET['route'] ?? 'home')),
 };
+$routeForSlowLog = (string) $route;
 $routes = array_merge(
     require __DIR__ . '/../route/web.php',
     require __DIR__ . '/../route/api.php'

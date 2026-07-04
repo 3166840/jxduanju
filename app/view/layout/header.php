@@ -243,6 +243,9 @@ if (!function_exists('jx_payment_icon')) {
             visibility: visible;
             pointer-events: auto;
         }
+        .page-loader.is-stale {
+            pointer-events: none;
+        }
         .page-loader-card {
             position: relative;
             display: grid;
