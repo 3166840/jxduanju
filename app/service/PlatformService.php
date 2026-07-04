@@ -10023,6 +10023,44 @@ class PlatformService
         return $dramas;
     }
 
+    public function homeDramas(int $limit = 6, ?string $appKey = null): array
+    {
+        $limit = max(1, min(24, $limit));
+        $frontDramas = $this->frontDramas();
+        if (empty($frontDramas)) {
+            return [];
+        }
+
+        $dramaById = [];
+        foreach ($frontDramas as $drama) {
+            $dramaById[(int) ($drama['id'] ?? 0)] = $drama;
+        }
+
+        $data = $this->store->load();
+        $appKey = $this->normalizeAppKey((string) ($appKey ?? $this->currentAppKey()));
+        $now = date('Y-m-d H:i:s');
+        $slots = ['home' => true, 'rank' => true, 'hot' => true, 'new' => true];
+        $recommendations = array_values(array_filter((array) ($data['home_recommendations'] ?? []), function (array $item) use ($appKey, $now, $slots, $dramaById): bool {
+            $contentId = (int) ($item['content_id'] ?? 0);
+            return isset($slots[(string) ($item['slot'] ?? 'home')])
+                && (string) ($item['content_type'] ?? 'drama') === 'drama'
+                && isset($dramaById[$contentId])
+                && $this->operationItemActiveForApp($item, $appKey, $now);
+        }));
+        usort($recommendations, static fn (array $a, array $b): int => [(int) ($a['sort'] ?? 0), (int) ($a['id'] ?? 0)] <=> [(int) ($b['sort'] ?? 0), (int) ($b['id'] ?? 0)]);
+
+        $rows = [];
+        foreach ($recommendations as $item) {
+            $dramaId = (int) ($item['content_id'] ?? 0);
+            if ($dramaId <= 0 || isset($rows[$dramaId])) {
+                continue;
+            }
+            $rows[$dramaId] = $dramaById[$dramaId];
+        }
+
+        return array_slice(array_values(!empty($rows) ? $rows : $frontDramas), 0, $limit);
+    }
+
     public function hotDramas(int $limit = 8): array
     {
         $items = array_values(array_filter($this->frontDramas(), static fn (array $drama): bool => !empty($drama['is_hot'])));

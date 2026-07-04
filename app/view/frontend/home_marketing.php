@@ -1,4 +1,7 @@
-<?php $title = '首页 - 精秀短剧'; ?>
+<?php
+$title = '首页 - 精秀短剧';
+$homeDramas = array_values((array) ($home_dramas ?? $dramas ?? []));
+?>
 <div class="hero">
     <div class="hero-content">
         <div class="tag">精秀短剧 H5 · 游客试看 · 支付即解锁</div>
@@ -38,7 +41,7 @@
     <span class="muted">按集付费 / 会员畅看</span>
 </div>
 <div class="grid">
-    <?php foreach ($dramas as $drama): ?>
+    <?php foreach ($homeDramas as $drama): ?>
         <div class="card drama-card">
             <img src="<?= htmlspecialchars($drama['cover']) ?>" alt="">
             <span class="pill jade"><?= htmlspecialchars($drama['status']) ?></span>
@@ -54,4 +57,7 @@
             </div>
         </div>
     <?php endforeach; ?>
+    <?php if (empty($homeDramas)): ?>
+        <p class="muted">暂无推荐短剧，去后台添加第一部短剧吧。</p>
+    <?php endif; ?>
 </div>

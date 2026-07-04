@@ -10,20 +10,21 @@ if ($homepageTemplate === 'marketing') {
     return;
 }
 
-$featuredDrama = $dramas[0] ?? null;
+$homeDramas = array_values((array) ($home_dramas ?? []));
+$featuredDrama = $homeDramas[0] ?? ($dramas[0] ?? null);
 $banner = $banners[0] ?? [
     'title' => $featuredDrama['title'] ?? '精秀短剧',
     'subtitle' => $featuredDrama['description'] ?? '热播短剧免费看',
     'link' => $featuredDrama ? '/?route=drama&id=' . (int) $featuredDrama['id'] : '/?route=home',
 ];
-$rankDramas = array_values($dramas);
+$rankDramas = $homeDramas;
 if (!empty($rankDramas)) {
     $rankSource = $rankDramas;
     for ($i = count($rankDramas); $i < 6; $i++) {
         $rankDramas[] = $rankSource[$i % count($rankSource)];
     }
 }
-$allDramas = array_values($dramas);
+$displayDramas = $homeDramas;
 $episodeCount = static fn (array $drama): int => count($drama['episodes'] ?? []);
 $cover = static fn (?array $drama): string => (string) (($drama['cover'] ?? '') ?: '/assets/cover-1.svg');
 ?>
@@ -67,7 +68,7 @@ $cover = static fn (?array $drama): string => (string) (($drama['cover'] ?? '') 
             <strong><span class="mini-crown"></span>必看榜</strong>
             <span>热播榜</span>
             <span>新剧榜</span>
-            <a href="#all-dramas">完整榜单</a>
+            <a href="/duanju">全部</a>
         </header>
         <?php if (empty($rankDramas)): ?>
             <p class="muted">暂无短剧，去后台添加第一部短剧吧。</p>
@@ -91,17 +92,20 @@ $cover = static fn (?array $drama): string => (string) (($drama['cover'] ?? '') 
 
     <section class="mini-section" id="all-dramas">
         <header>
-            <h2><span class="mini-tv"></span>全部剧集</h2>
+            <h2><span class="mini-tv"></span>推荐剧集</h2>
             <a href="/?route=center">我的权益</a>
         </header>
         <div class="mini-drama-grid">
-            <?php foreach ($allDramas as $drama): ?>
+            <?php foreach ($displayDramas as $drama): ?>
                 <a class="mini-drama-card" href="/?route=drama&id=<?= (int) $drama['id'] ?>">
                     <img src="<?= htmlspecialchars($cover($drama)) ?>" alt="">
                     <strong><?= htmlspecialchars($drama['title']) ?></strong>
                     <span>共<?= number_format($episodeCount($drama)) ?>集 · 单集 ￥<?= htmlspecialchars((string) $drama['price_per_episode']) ?></span>
                 </a>
             <?php endforeach; ?>
+            <?php if (empty($displayDramas)): ?>
+                <p class="muted">暂无推荐短剧，去后台添加第一部短剧吧。</p>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -113,7 +117,7 @@ $cover = static fn (?array $drama): string => (string) (($drama['cover'] ?? '') 
 
 <nav class="mini-bottom-nav" aria-label="首页底部导航">
     <a class="is-active" href="/?route=home"><?= jx_icon('home') ?><span>推荐</span></a>
-    <a href="#all-dramas"><?= jx_icon('drama') ?><span>小剧场</span></a>
+    <a href="/duanju"><?= jx_icon('drama') ?><span>小剧场</span></a>
     <a href="/?route=bind"><?= jx_icon('revenue') ?><span>福利</span><i></i></a>
     <a href="/?route=center"><?= jx_icon('user') ?><span>我的</span></a>
 </nav>

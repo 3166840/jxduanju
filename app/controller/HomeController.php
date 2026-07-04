@@ -11,6 +11,7 @@ class HomeController
         $service = new PlatformService();
         $data = $service->dashboard();
         $data['dramas'] = $service->frontDramas();
+        $data['home_dramas'] = $service->homeDramas(6);
         $previewTemplate = (string) ($_GET['preview_homepage_template'] ?? '');
         if (in_array($previewTemplate, ['mini', 'marketing'], true)) {
             $data['homepage_template'] = $previewTemplate;
